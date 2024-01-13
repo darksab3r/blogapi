@@ -28,12 +28,8 @@ public class UsersService {
                         .build()
         );
         //TODO:
-        //  1.create userEntity object
-        // 2. save the user using userRespository.save()
 //            a.validate username min/max length
-//            b.hash the password
 //            c.validate email format
-//         3. return saved user
         return savedUser;
     }
 

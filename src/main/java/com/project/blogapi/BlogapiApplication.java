@@ -1,11 +1,14 @@
 package com.project.blogapi;
 
+import com.project.blogapi.articles.ArticleEntity;
+import com.project.blogapi.articles.dto.ArticleResponseDTO;
 import com.project.blogapi.security.jwt.JWTTokenService;
 import com.project.blogapi.security.TokenService;
 import com.project.blogapi.security.tokens.UserTokenRepository;
 import com.project.blogapi.security.tokens.UserTokenService;
 import com.project.blogapi.users.UsersRepository;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.PropertyMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.SpringApplication;
@@ -31,7 +34,18 @@ public class BlogapiApplication {
 	@Bean //make custom autowiring -> Dependency Injection
 	@Scope(BeanDefinition.SCOPE_SINGLETON)
 	public ModelMapper modelMapper(){
-		return new ModelMapper();
+		ModelMapper modelMapper = new ModelMapper();
+
+		// Custom mapping configuration for ArticleEntity to ArticleResponseDTO
+		modelMapper.addMappings(new PropertyMap<ArticleEntity, ArticleResponseDTO>() {
+			@Override
+            protected void configure() {
+				// Skip mapping the entire UserEntity and map only the username to the author field
+				map().setAuthor(source.getAuthor().getUsername());
+			}
+		});
+
+		return modelMapper;
 	}
 	@Bean
 	@Scope(BeanDefinition.SCOPE_SINGLETON)
