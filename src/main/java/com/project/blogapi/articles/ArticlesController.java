@@ -76,14 +76,19 @@ public class ArticlesController {
     }
 
     @PutMapping("/{id}/like") //idempotent
-    ResponseEntity<Void> likeArticle(){
-
-        return null;
+    ResponseEntity<String> likeArticle(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal String username
+    ){
+        articlesService.likeArticle(id,username);
+        return ResponseEntity.accepted().body(username+" liked article "+getArticleById(id).getBody().getTitle());
     }
     @DeleteMapping("/{id}/unlike")
-    ResponseEntity<Void> unlikeArticle(){
-
-        return null;
+    ResponseEntity<String> unlikeArticle(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal String username
+    ){
+        articlesService.unlikeArticle(id,username);
+        return ResponseEntity.accepted().body(username+" unliked article "+getArticleById(id).getBody().getTitle());
     }
-
 }

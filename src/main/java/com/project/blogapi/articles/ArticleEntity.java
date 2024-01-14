@@ -28,7 +28,7 @@ public class ArticleEntity extends BaseEntity {
     @ManyToOne
     UserEntity author;
 
-    @ManyToMany(targetEntity = UserEntity.class)
+    @ManyToMany(targetEntity = UserEntity.class, cascade = CascadeType.ALL)
     @JoinTable(name = "article_likes",
             joinColumns = @JoinColumn(name="article_id"),
             inverseJoinColumns = @JoinColumn(name="user_id")

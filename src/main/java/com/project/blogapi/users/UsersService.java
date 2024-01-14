@@ -1,9 +1,12 @@
 package com.project.blogapi.users;
 
+import org.apache.catalina.User;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Service
 public class UsersService {
@@ -31,6 +34,10 @@ public class UsersService {
 //            a.validate username min/max length
 //            c.validate email format
         return savedUser;
+    }
+
+    public UserEntity getUserById(UUID userId){
+        return usersRepository.findById(userId).orElse(null);
     }
 
     public UserEntity loginUser(String username, String password){

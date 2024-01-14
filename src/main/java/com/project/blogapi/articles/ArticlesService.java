@@ -3,6 +3,8 @@ package com.project.blogapi.articles;
 import com.project.blogapi.articles.dto.CreateArticleDTO;
 import com.project.blogapi.articles.dto.UpdateArticleDTO;
 import com.project.blogapi.users.UsersRepository;
+import com.project.blogapi.users.UsersService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,9 +19,9 @@ public class ArticlesService {
     public final UsersRepository usersRepository;
 
     public ArticlesService(
-            ArticlesRepository articlesRepository,
-            UsersRepository usersRepository
-    ) {
+            @Autowired ArticlesRepository articlesRepository,
+            @Autowired UsersRepository usersRepository
+            ) {
         this.articlesRepository = articlesRepository;
         this.usersRepository = usersRepository;
     }
@@ -52,7 +54,7 @@ public class ArticlesService {
 
     public ArticleEntity getArticleById(UUID id){
         var article = articlesRepository.findById(id);
-        return article.orElse(null);
+        return article.orElse(null); //other way of writing is article.get();
     }
 
     public ArticleEntity updateArticle(UUID articleId, UpdateArticleDTO updateArticleDTO){
@@ -83,7 +85,7 @@ public class ArticlesService {
 
     public boolean deleteArticle(UUID articleId){
         if(isArticlePresent(articleId)){
-            throw new ArticleNotFoundException("Article not found");
+            throw new ArticleNotFoundException(articleId);
         }
         var article = getArticleById(articleId);
         articlesRepository.delete(article);
@@ -93,6 +95,41 @@ public class ArticlesService {
     public boolean isArticlePresent(UUID articleId){
         return !articlesRepository.existsById(articleId);
     }
+
+    public boolean likeArticle(UUID articleId, String username) {
+
+        var article = getArticleById(articleId);
+        var user = usersRepository.findByUsername(username);
+
+        if (article.getLikes().contains(user)) {
+            throw new ArticleAlreadyLikedException(username);
+        }
+
+        user.getFavouriteArticles().add(article);
+        usersRepository.save(user);
+
+        article.getLikes().add(user);
+        articlesRepository.save(article);
+        return true;
+    }
+
+    public boolean unlikeArticle(UUID articleId, String username) {
+
+        var article = getArticleById(articleId);
+        var user = usersRepository.findByUsername(username);
+
+        if (!article.getLikes().contains(user)) {
+            throw new ArticleNotLikedException(username);
+        }
+
+        user.getFavouriteArticles().remove(article);
+        usersRepository.save(user);
+
+        article.getLikes().remove(user);
+        articlesRepository.save(article);
+        return true;
+    }
+
     static class ArticleNotFoundException extends IllegalArgumentException {
         public ArticleNotFoundException(String slug) {
             super("Article " + slug + " not found");
@@ -100,6 +137,18 @@ public class ArticlesService {
 
         public ArticleNotFoundException(UUID id) {
             super("Article with id: " + id + " not found");
+        }
+    }
+
+    static  class  ArticleAlreadyLikedException extends RuntimeException{
+        public ArticleAlreadyLikedException(String username){
+            super(username+" have already liked this article");
+        }
+    }
+
+    static  class  ArticleNotLikedException extends RuntimeException{
+        public ArticleNotLikedException(String username){
+            super(username+" do not like this article");
         }
     }
 
