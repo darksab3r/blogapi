@@ -2,6 +2,7 @@ package com.project.blogapi.articles;
 
 import com.project.blogapi.articles.dto.ArticleResponseDTO;
 import com.project.blogapi.articles.dto.CreateArticleDTO;
+import com.project.blogapi.articles.dto.UpdateArticleDTO;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -37,10 +38,11 @@ public class ArticlesController {
     }
 
     @GetMapping("/{id}")
-    ResponseEntity<Void> getArticleByID(){
-        return null;
+    ResponseEntity<ArticleResponseDTO>getArticleById(
+            @PathVariable UUID id
+    ) {
+        return ResponseEntity.accepted().body(modelMapper.map(articlesService.getArticleById(id), ArticleResponseDTO.class));
     }
-
     @PostMapping("")
     ResponseEntity<ArticleResponseDTO> createArticle(
             @RequestBody CreateArticleDTO createArticleDTO,
@@ -52,14 +54,25 @@ public class ArticlesController {
     }
 
     @PatchMapping("/{id}")
-    ResponseEntity<Void> updateArticle(){
-        return null;
+    ResponseEntity<ArticleResponseDTO> updateArticle(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal String username,
+            @RequestBody UpdateArticleDTO updateArticleDTO
+            ){
+        articlesService.verifyAuthor(id,username);
+        var updatedArticle = articlesService.updateArticle(id,updateArticleDTO);
+        var response = modelMapper.map(updatedArticle,ArticleResponseDTO.class);
+        return ResponseEntity.accepted().body(response);
     }
 
     @DeleteMapping("/{id}")
-    ResponseEntity<Void> deleteArticle(){
-
-        return null;
+    ResponseEntity<String> deleteArticle(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal String username
+    ){
+        articlesService.verifyAuthor(id,username);
+        articlesService.deleteArticle(id);
+        return ResponseEntity.accepted().body("Article deleted");
     }
 
     @PutMapping("/{id}/like") //idempotent
@@ -67,9 +80,10 @@ public class ArticlesController {
 
         return null;
     }
-    @DeleteMapping
+    @DeleteMapping("/{id}/unlike")
     ResponseEntity<Void> unlikeArticle(){
 
         return null;
     }
+
 }

@@ -1,8 +1,8 @@
 package com.project.blogapi.articles;
 
 import com.project.blogapi.articles.dto.CreateArticleDTO;
+import com.project.blogapi.articles.dto.UpdateArticleDTO;
 import com.project.blogapi.users.UsersRepository;
-import org.bouncycastle.util.io.Streams;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,11 +31,10 @@ public class ArticlesService {
     }
 
     public ArticleEntity getArticleBySlug(String slug){
-        var article = articlesRepository.findBySlug(slug);
         if(slug==null){
             return null;
         }
-        return article;
+        return articlesRepository.findBySlug(slug);
     }
 
     public ArticleEntity createArticle(CreateArticleDTO createArticleDTO, String authorUsername){
@@ -49,6 +48,64 @@ public class ArticlesService {
                         .author(author)
                         .build()
                 );
+    }
 
+    public ArticleEntity getArticleById(UUID id){
+        var article = articlesRepository.findById(id);
+        return article.orElse(null);
+    }
+
+    public ArticleEntity updateArticle(UUID articleId, UpdateArticleDTO updateArticleDTO){
+
+        var article = articlesRepository.findById(articleId).orElseThrow(() -> new ArticleNotFoundException(articleId));
+
+        if(updateArticleDTO.getTitle()!=null){
+            article.setTitle(updateArticleDTO.getTitle());
+            article.setSlug(updateArticleDTO.getTitle().toLowerCase().replaceAll(" ","-"));
+        }
+
+        if(updateArticleDTO.getBody()!=null){
+            article.setBody(updateArticleDTO.getBody());
+        }
+
+        if(updateArticleDTO.getSubtitle()!=null){
+            article.setBody(updateArticleDTO.getBody());
+        }
+
+        return articlesRepository.save(article);
+    }
+
+    public void verifyAuthor(UUID articleId, String username){
+        if(getArticleById(articleId).getAuthor()!=usersRepository.findByUsername(username)){
+            throw new IllegalAccessException();
+        }
+    }
+
+    public boolean deleteArticle(UUID articleId){
+        if(isArticlePresent(articleId)){
+            throw new ArticleNotFoundException("Article not found");
+        }
+        var article = getArticleById(articleId);
+        articlesRepository.delete(article);
+        return isArticlePresent(articleId);
+    }
+
+    public boolean isArticlePresent(UUID articleId){
+        return !articlesRepository.existsById(articleId);
+    }
+    static class ArticleNotFoundException extends IllegalArgumentException {
+        public ArticleNotFoundException(String slug) {
+            super("Article " + slug + " not found");
+        }
+
+        public ArticleNotFoundException(UUID id) {
+            super("Article with id: " + id + " not found");
+        }
+    }
+
+    static class IllegalAccessException extends IllegalAccessError{
+        public IllegalAccessException(){
+            super("Necessary permissions to access not found");
+        }
     }
 }

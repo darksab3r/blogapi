@@ -7,11 +7,12 @@ import lombok.*;
 
 import java.util.List;
 
-@Entity(name="article")
+@Entity(name="articles")
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Setter
 public class ArticleEntity extends BaseEntity {
 
     @Column(nullable = false, length = 150)
