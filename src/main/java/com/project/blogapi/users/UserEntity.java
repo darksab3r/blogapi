@@ -1,5 +1,6 @@
 package com.project.blogapi.users;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.project.blogapi.articles.ArticleEntity;
 import com.project.blogapi.common.BaseEntity;
 import jakarta.persistence.*;
@@ -8,7 +9,7 @@ import lombok.*;
 import java.util.List;
 
 @Getter
-@ToString
+@Setter
 @Entity(name = "users")
 @Builder
 @NoArgsConstructor(force = true)

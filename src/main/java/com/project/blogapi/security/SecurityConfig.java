@@ -22,13 +22,14 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
+
         http.csrf(csrf -> csrf.disable()).authorizeRequests()
-                .requestMatchers(HttpMethod.GET,"/articles**").permitAll()
+                .requestMatchers(HttpMethod.GET,"/articles/**").permitAll()
                 .requestMatchers(HttpMethod.POST,"/users/signup").permitAll()
                 .requestMatchers(HttpMethod.POST,"/users/login").permitAll()
                 .requestMatchers(antMatcher("/h2-console/**")).permitAll()
                 .anyRequest().authenticated();
-//                .anyRequest().permitAll();
+
         http.addFilterBefore(new UserAuthenticationFilter(tokenService), AnonymousAuthenticationFilter.class);
         return http.build();
     }

@@ -84,16 +84,16 @@ public class ArticlesService {
     }
 
     public boolean deleteArticle(UUID articleId){
-        if(isArticlePresent(articleId)){
+        if(!isArticlePresent(articleId)){
             throw new ArticleNotFoundException(articleId);
         }
         var article = getArticleById(articleId);
         articlesRepository.delete(article);
-        return isArticlePresent(articleId);
+        return !isArticlePresent(articleId);
     }
 
     public boolean isArticlePresent(UUID articleId){
-        return !articlesRepository.existsById(articleId);
+        return articlesRepository.existsById(articleId);
     }
 
     public boolean likeArticle(UUID articleId, String username) {
